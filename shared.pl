@@ -6,6 +6,16 @@ take(N0, [A | As], [A | Bs]:Rest) :-
     N #= N0 - 1,
     take(N, As, Bs:Rest).
 
+:- begin_tests(take).
+
+test("should split a list after N elements", nondet) :-
+    take(3, [1,2,3,4], [1,2,3]:[4]).
+
+test("should fail if list is too short", nondet) :-
+    \+ take(2, [1], _).
+
+:- end_tests(take).
+
 partition(N0, Input, [Group | Groups]) :-
     take(_, Input, Group:Rest),
     Group \= [],
@@ -14,11 +24,6 @@ partition(N0, Input, [Group | Groups]) :-
 partition(1, Input, [Input]) :-
     is_list(Input),
     Input \== [].
-
-is_char(Char) :-
-    atom(Char),
-    catch(char_code(Char, _), Failed, true),
-    var(Failed).
 
 :- begin_tests(partition).
 
@@ -48,3 +53,24 @@ test("partition produces multiple solutions",
     partition(2, [1, 2, 3, 4], Output).
 
 :- end_tests(partition).
+
+is_char(Char) :-
+    atom(Char),
+    catch(char_code(Char, _), Failed, true),
+    var(Failed).
+
+:- begin_tests(is_char).
+
+test("should not raise exceptions for non-characters") :-
+    \+ is_char("string"),
+    \+ is_char(5),
+    \+ is_char(_).
+
+test("should succeed for characters") :-
+    is_char('s'),
+    is_char('S'),
+    is_char('5'),
+    is_char('!'),
+    is_char('\n').
+
+:- end_tests(is_char).
