@@ -1,5 +1,5 @@
 
-:- use_module(library(clpfd)).
+:- ['../shared.pl'].
 
 %% Grammar from page 105
 % Expr_s -> Expr + Term | Term
@@ -35,22 +35,3 @@ match([Char | Xs], [[Char] | Ys], [Char|Tail]) :-
 match([Rule | Xs], [Y | Ys], [Head|Tail]) :-
     try_parse(Rule, Y, Head),
     match(Xs, Ys, Tail).
-
-take(0, Rest, []:Rest).
-take(N0, [A | As], [A | Bs]:Rest) :-
-    N #= N0 - 1,
-    take(N, As, Bs:Rest).
-
-partition(N0, Input, [Group | Groups]) :-
-    take(_, Input, Group:Rest),
-    Group \= [],
-    N #= N0 - 1,
-    partition(N, Rest, Groups).
-partition(1, Input, [Input]) :-
-    is_list(Input),
-    Input \== [].
-
-is_char(Char) :-
-    atom(Char),
-    catch(char_code(Char, _), Failed, true),
-    var(Failed).
