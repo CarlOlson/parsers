@@ -22,9 +22,9 @@ data Result : t -> Type where
   Success : t -> Result t
   Failure : String -> Result t
 
-(>>=) : t -> Result $ List t -> Result $ List t
-(>>=) x (Success xs) = Success $ x :: xs
-(>>=) _ (Failure err) = Failure err
+(>>) : t -> Result $ List t -> Result $ List t
+(>>) x (Success xs) = Success $ x :: xs
+(>>) _ (Failure err) = Failure err
 
 mutual
   acceptParens : List Token -> Maybe $ (Parens, List Token)
@@ -50,8 +50,8 @@ tokenize str = tokenizeh $ unpack str
     tokenizeh [] = Success []
     tokenizeh (x :: xs) =
       case x of
-        '(' => LP >>= (tokenizeh xs)
-        ')' => RP >>= (tokenizeh xs)
+        '(' => LP >> (tokenizeh xs)
+        ')' => RP >> (tokenizeh xs)
         c => Failure $ "BAD TOKEN " ++ (singleton c)
 
 parse : String -> Maybe Parens
