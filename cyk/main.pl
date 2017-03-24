@@ -8,15 +8,15 @@ rule(number, [real]).
 rule(integer, [digit]).
 rule(integer, [digit, integer]).
 rule(real, [integer, fraction]).
-%% rule(real, [integer, fraction, scale]).
+rule(real, [integer, fraction, scale]).
 rule(fraction, ['.', integer]).
-%% rule(scale, ['e', sign, integer]).
+rule(scale, ['e', sign, integer]).
 %% rule(scale, [empty]).
 rule(digit, [D]) :-
     string_chars("0123456789", Digits),
     member(D, Digits).
-%% rule(sign, ['+']).
-%% rule(sign, ['-']).
+rule(sign, ['+']).
+rule(sign, ['-']).
 
 parse(Input, Output) :-
     string_chars(Input, Chars),
@@ -26,13 +26,13 @@ parse(Input, Output) :-
     start_rule(StartRule),
     member(StartRule, Rules).
 
-equivalent_terms(Term, Term).
-equivalent_terms(Term, NextTerm) :-
+equivalent_term(Term, Term).
+equivalent_term(Term, NextTerm) :-
     rule(EqTerm, [Term]),
-    equivalent_terms(EqTerm, NextTerm).
+    equivalent_term(EqTerm, NextTerm).
 
 make_possible(Token, Terms) :-
-    setof(Term, equivalent_terms(Token, Term), Terms).
+    setof(Term, equivalent_term(Token, Term), Terms).
 
 make_matrix([], []).
 make_matrix([T|Ts], [[C]|Cs]) :-
@@ -70,13 +70,16 @@ members_size([_|Xs], X, Size) :-
     members_size(Xs, X, Size).
 
 possible_terms(N, Matrix, Possible) :-
-    setof(Term, possible_term(N, Matrix, [], Term), Possible).
+    setof(Term, possible_term(N, Matrix, [], Term), Possible);
+    Possible = [].
 
-possible_term(0, _, In, Out) :-
-    rule(Out, In).
-possible_term(0, _, In, Out) :-
+possible_term(0, _, InRev, Out) :-
+    reverse(In, InRev),
     rule(Term, In),
-    possible_term(0, _, [Term], Out).
+    equivalent_term(Term, Out).
+possible_term(N, [_|Cols], Terms, Out) :-
+    N > 0,
+    possible_term(N, Cols, Terms, Out).
 possible_term(N, [Col|Cols], Terms, Out) :-
     N > 0,
     members_size(Col, Row, Size),
